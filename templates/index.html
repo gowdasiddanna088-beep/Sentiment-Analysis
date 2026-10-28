@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f7f8fc">
+    <title>SentimentAI | Review Analyzer</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="page-glow glow-one"></div>
+    <div class="page-glow glow-two"></div>
+
+    <!-- Navbar -->
+    <header class="navbar">
+        <a class="brand" href="/">
+            <span class="brand-icon">✳</span>
+            <span>Sentiment<span class="brand-accent">AI</span></span>
+        </a>
+
+        <div class="nav-right">
+            <span class="live-dot"></span>
+            <span class="nav-label">AI Review Analyzer</span>
+            <span class="version">BETA</span>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="eyebrow">
+                <span>✦</span> POWERED BY MACHINE LEARNING
+            </div>
+
+            <h1>Every review tells a <span>story.</span></h1>
+
+            <p class="hero-description">
+                Discover the emotion behind your words. Analyze any review
+                and uncover whether the feeling is positive or negative.
+            </p>
+        </section>
+
+        <!-- Analyzer Card -->
+        <section class="analyzer-card">
+
+            <div class="card-heading">
+                <div class="heading-icon">✎</div>
+                <div>
+                    <h2>Analyze your text</h2>
+                    <p>Paste a review below and let AI do the thinking.</p>
+                </div>
+            </div>
+
+            <!-- Sample Reviews -->
+            <div class="sample-section">
+                <span class="sample-label">TRY A SAMPLE</span>
+
+                <div class="sample-buttons">
+                    <button
+                        type="button"
+                        class="sample-btn positive-sample"
+                        data-review="Absolutely loved this product! The quality is amazing, the experience was wonderful, and I would highly recommend it.">
+                        <span>☺</span> Positive
+                    </button>
+
+                    <button
+                        type="button"
+                        class="sample-btn negative-sample"
+                        data-review="Terrible experience. The quality was poor, the service was disappointing, and I regret spending money on this.">
+                        <span>☹</span> Negative
+                    </button>
+
+                    <button
+                        type="button"
+                        class="sample-btn"
+                        data-review="The product arrived on time. It looks as described, and the quality is average.">
+                        Neutral-style example
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review Form -->
+            <form action="/predict" method="POST" id="sentimentForm">
+
+                <div class="textarea-wrapper">
+                    <textarea
+                        id="review"
+                        name="review"
+                        maxlength="10000"
+                        placeholder="Start typing or paste your review here...
+
+For example: I had an amazing experience. Everything exceeded my expectations!"
+                        required>{{ review or '' }}</textarea>
+
+                    <div class="textarea-footer">
+                        <span id="inputHint">
+                            ✦ Your text stays in this local app.
+                        </span>
+
+                        <span id="charCount">0 / 10,000</span>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                {% if error %}
+                <div class="error-message" role="alert">
+                    ⚠ {{ error }}
+                </div>
+                {% endif %}
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button
+                        type="button"
+                        id="clearBtn"
+                        class="clear-btn">
+                        ↺ Clear
+                    </button>
+
+                    <button
+                        type="submit"
+                        id="analyzeBtn"
+                        class="analyze-btn">
+                        <span id="buttonIcon">✦</span>
+                        <span id="buttonText">Analyze sentiment</span>
+                        <span class="button-arrow">→</span>
+                    </button>
+                </div>
+
+            </form>
+
+            <!-- Sentiment Result -->
+            {% if sentiment %}
+
+            <section
+                class="result-panel {{ 'result-positive' if sentiment == 'Positive' else 'result-negative' }}"
+                id="result"
+                aria-live="polite">
+
+                <div class="result-top">
+
+                    <div class="result-symbol">
+                        {{ '☺' if sentiment == 'Positive' else '☹' }}
+                    </div>
+
+                    <div class="result-copy">
+                        <span class="result-eyebrow">
+                            ANALYSIS COMPLETE
+                        </span>
+
+                        <h2>{{ sentiment }} sentiment detected</h2>
+
+                        <p>
+                            {% if sentiment == 'Positive' %}
+                                This review leans toward a positive opinion.
+                            {% else %}
+                                This review leans toward a negative opinion.
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <span class="result-badge">
+                        {{ 'POSITIVE' if sentiment == 'Positive' else 'NEGATIVE' }}
+                    </span>
+
+                </div>
+
+                <!-- Updated Confidence Section -->
+                <div class="confidence-section">
+
+                    <div class="confidence-heading">
+                        <span>Model confidence</span>
+                        <strong>{{ confidence | default(0) }}%</strong>
+                    </div>
+
+                    <div class="confidence-track">
+                        <div
+                            class="confidence-fill"
+                            style="width: {{ confidence | default(0) }}%;">
+                        </div>
+                    </div>
+
+                    <p class="confidence-note">
+                        Confidence reflects the model's estimated preference
+                        for its predicted class, not a guarantee of correctness.
+                    </p>
+
+                </div>
+
+            </section>
+
+            {% endif %}
+
+            <!-- Privacy Note -->
+            <div class="privacy-note">
+                <span>🔒</span>
+                <span>
+                    Designed for quick text analysis. Predictions may not
+                    understand sarcasm or mixed opinions.
+                </span>
+            </div>
+
+        </section>
+
+        <!-- Features -->
+        <section class="features">
+
+            <div class="feature">
+                <div class="feature-icon purple">✦</div>
+                <h3>AI-powered insights</h3>
+                <p>Machine learning analyzes patterns in review text.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon green">↗</div>
+                <h3>Instant results</h3>
+                <p>Get a sentiment prediction in seconds.</p>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon orange">▤</div>
+                <h3>Simple and intuitive</h3>
+                <p>A clean workspace built for easy text analysis.</p>
+            </div>
+
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-brand">✳ SentimentAI</div>
+            <p>Built with Python, Flask &amp; Machine Learning</p>
+            <span>ACADEMIC PROJECT · 2026</span>
+        </footer>
+
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+        const reviewInput = document.getElementById("review");
+        const charCount = document.getElementById("charCount");
+        const clearBtn = document.getElementById("clearBtn");
+        const form = document.getElementById("sentimentForm");
+        const analyzeBtn = document.getElementById("analyzeBtn");
+        const buttonText = document.getElementById("buttonText");
+        const buttonIcon = document.getElementById("buttonIcon");
+
+        // Update character counter
+        function updateCounter() {
+            charCount.textContent =
+                `${reviewInput.value.length.toLocaleString()} / 10,000`;
+        }
+
+        reviewInput.addEventListener("input", updateCounter);
+
+        // Sample review buttons
+        document.querySelectorAll(".sample-btn[data-review]")
+            .forEach(button => {
+                button.addEventListener("click", () => {
+                    reviewInput.value = button.dataset.review;
+                    updateCounter();
+                    reviewInput.focus();
+
+                    document.querySelectorAll(".sample-btn")
+                        .forEach(btn => {
+                            btn.classList.remove("selected");
+                        });
+
+                    button.classList.add("selected");
+                });
+            });
+
+        // Clear button
+        clearBtn.addEventListener("click", () => {
+            reviewInput.value = "";
+            updateCounter();
+
+            document.querySelectorAll(".sample-btn")
+                .forEach(btn => {
+                    btn.classList.remove("selected");
+                });
+
+            const result = document.getElementById("result");
+
+            if (result) {
+                result.remove();
+            }
+
+            document.querySelectorAll(".error-message")
+                .forEach(element => element.remove());
+
+            buttonText.textContent = "Analyze sentiment";
+            buttonIcon.textContent = "✦";
+            analyzeBtn.disabled = false;
+
+            reviewInput.focus();
+        });
+
+        // Form validation and submission
+        form.addEventListener("submit", event => {
+            if (!reviewInput.value.trim()) {
+                event.preventDefault();
+                reviewInput.focus();
+                return;
+            }
+
+            if (reviewInput.value.length > 10000) {
+                event.preventDefault();
+                return;
+            }
+
+            analyzeBtn.disabled = true;
+            buttonText.textContent = "Analyzing...";
+            buttonIcon.textContent = "◌";
+        });
+
+        // Initialize character counter
+        updateCounter();
+    </script>
+
+</body>
+</html>
